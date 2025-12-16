@@ -10,31 +10,42 @@ from sklearn.metrics import silhouette_score, accuracy_score
 from sklearn.decomposition import PCA
 
 # ================================
-# KONFIGURASI
+# KONFIGURASI HALAMAN
 # ================================
-st.set_page_config(page_title="Lung Cancer Clustering", layout="wide")
+st.set_page_config(
+    page_title="Lung Cancer Clustering",
+    layout="wide"
+)
+
 st.title("🫁 Lung Cancer Clustering")
 st.caption("Metode: K-Means & Logistic Regression")
 
 # ================================
 # UPLOAD DATASET
 # ================================
-uploaded_file = st.file_uploader("Upload Dataset Lung Cancer (CSV)", type=["csv"])
+uploaded_file = st.file_uploader(
+    "Upload Dataset Lung Cancer (CSV)",
+    type=["csv"]
+)
 
 if uploaded_file is None:
-    st.warning("Silakan upload dataset CSV")
+    st.warning("Silakan upload dataset CSV terlebih dahulu")
     st.stop()
 
 df = pd.read_csv(uploaded_file)
 st.success("Dataset berhasil dimuat")
+
+st.write("Jumlah data:", df.shape[0])
 st.dataframe(df.head())
 
 # ================================
 # PREPROCESSING
 # ================================
-df_proc = df.copy()
+st.subheader("⚙️ Preprocessing Data")
 
+df_proc = df.copy()
 label_encoders = {}
+
 for col in df_proc.columns:
     if df_proc[col].dtype == "object":
         le = LabelEncoder()
@@ -46,8 +57,10 @@ X = df_proc
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
+st.success("Encoding & Standardisasi selesai")
+
 # ================================
-# K-MEANS
+# K-MEANS CLUSTERING
 # ================================
 st.subheader("🔹 K-Means Clustering")
 
@@ -66,7 +79,7 @@ sil_score = silhouette_score(X_scaled, clusters)
 st.metric("Silhouette Score", round(sil_score, 3))
 
 # ================================
-# VISUALISASI (STREAMLIT NATIVE)
+# VISUALISASI CLUSTER (STREAMLIT NATIVE)
 # ================================
 st.subheader("📊 Visualisasi Cluster (PCA 2D)")
 
@@ -112,16 +125,21 @@ st.metric("Akurasi Logistic Regression", round(acc, 3))
 st.subheader("🧪 Input Data Pasien Baru")
 
 input_data = {}
+
 with st.form("input_form"):
     for col in df_proc.columns:
         if col in label_encoders:
-            input_data[col] = st.selectbox(col, label_encoders[col].classes_)
+            input_data[col] = st.selectbox(
+                col,
+                label_encoders[col].classes_
+            )
         else:
             input_data[col] = st.number_input(
                 col,
                 float(df[col].min()),
                 float(df[col].max())
             )
+
     submit = st.form_submit_button("Prediksi Cluster")
 
 if submit:
@@ -134,3 +152,9 @@ if submit:
     predicted_cluster = kmeans.predict(input_scaled)[0]
 
     st.success(f"Pasien termasuk ke **Cluster {predicted_cluster}**")
+
+# ================================
+# DATA AKHIR
+# ================================
+st.subheader("📄 Contoh Data dengan Cluster")
+st.dataframe(df.head(10))
