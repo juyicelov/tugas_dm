@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.cluster import KMeans
@@ -48,7 +47,7 @@ scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
 # ================================
-# K-MEANS CLUSTERING
+# K-MEANS
 # ================================
 st.subheader("🔹 K-Means Clustering")
 
@@ -67,25 +66,25 @@ sil_score = silhouette_score(X_scaled, clusters)
 st.metric("Silhouette Score", round(sil_score, 3))
 
 # ================================
-# VISUALISASI (PCA HANYA UNTUK VISUAL)
+# VISUALISASI (STREAMLIT NATIVE)
 # ================================
 st.subheader("📊 Visualisasi Cluster (PCA 2D)")
 
 pca = PCA(n_components=2)
 X_pca = pca.fit_transform(X_scaled)
 
-fig, ax = plt.subplots()
-scatter = ax.scatter(
-    X_pca[:, 0],
-    X_pca[:, 1],
-    c=clusters,
-    cmap="viridis",
-    alpha=0.7
+viz_df = pd.DataFrame({
+    "PCA1": X_pca[:, 0],
+    "PCA2": X_pca[:, 1],
+    "Cluster": clusters
+})
+
+st.scatter_chart(
+    viz_df,
+    x="PCA1",
+    y="PCA2",
+    color="Cluster"
 )
-ax.set_xlabel("PCA 1")
-ax.set_ylabel("PCA 2")
-ax.set_title("Visualisasi Clustering K-Means")
-st.pyplot(fig)
 
 # ================================
 # LOGISTIC REGRESSION
